@@ -53,9 +53,11 @@ export async function runMain(): Promise<void> {
 		);
 		const runCommand = core.getInput('runCmd');
 		const inputEnvs: string[] = core.getMultilineInput('env');
-		const inputEnvsWithDefaults = populateDefaults(inputEnvs);
+		const inheritEnv: boolean = core.getBooleanInput('inheritEnv');
+		const inputEnvsWithDefaults = populateDefaults(inputEnvs, inheritEnv);
 		const cacheFrom: string[] = core.getMultilineInput('cacheFrom');
 		const noCache: boolean = core.getBooleanInput('noCache');
+		const cacheTo: string[] = core.getMultilineInput('cacheTo');
 		const skipContainerUserIdUpdate = core.getBooleanInput(
 			'skipContainerUserIdUpdate',
 		);
@@ -120,6 +122,7 @@ export async function runMain(): Promise<void> {
 				userDataFolder,
 				output: buildxOutput,
 				noCache,
+				cacheTo,
 			};
 			const result = await devcontainer.build(args, log);
 
