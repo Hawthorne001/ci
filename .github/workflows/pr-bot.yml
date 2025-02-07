@@ -12,6 +12,8 @@ on:
 permissions:
   contents: write
   packages: write
+  pull-requests: write
+  checks: write
 
 jobs:
   pr_comment:
@@ -39,7 +41,7 @@ jobs:
       # Determine whether the comment is a command
       - id: check_command
         name: Check for a command using GitHub script
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const script = require('./.github/scripts/build.js')
@@ -58,7 +60,7 @@ jobs:
       # we won't receive a check-run status, and will have to send it "manually"
       - name: Bypass E2E check-runs status
         if: ${{ steps.check_command.outputs.command == 'test-force-approve' }}
-        uses: LouisBrunner/checks-action@v1.1.1
+        uses: LouisBrunner/checks-action@v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # the name must be identical to the one received by the real job

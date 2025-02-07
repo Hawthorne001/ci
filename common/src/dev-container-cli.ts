@@ -4,6 +4,7 @@ import path from 'path';
 import {env} from 'process';
 import {promisify} from 'util';
 import {ExecFunction} from './exec';
+import {findWindowsExecutable} from './windows';
 
 const cliVersion = "0"; // Use 'latest' to get latest CLI version, or pin to specific version e.g. '0.14.1' if required
 
@@ -27,7 +28,8 @@ function getSpecCliInfo() {
 
 async function isCliInstalled(exec: ExecFunction): Promise<boolean> {
   try {
-    const {exitCode} = await exec(getSpecCliInfo().command, ['--help'], {
+    const command = await findWindowsExecutable(getSpecCliInfo().command);
+    const {exitCode} = await exec(command, ['--help'], {
       silent: true,
     });
     return exitCode === 0;
@@ -121,7 +123,7 @@ async function runSpecCliJsonCommand<T>(options: {
     err: data => options.log(data),
     env: options.env ? {...process.env, ...options.env} : process.env,
   };
-  const command = getSpecCliInfo().command;
+  const command = await findWindowsExecutable(getSpecCliInfo().command);
   console.log(`About to run ${command} ${options.args.join(' ')}`); // TODO - take an output arg to allow GH to use core.info
   await spawn(command, options.args, spawnOptions);
 
@@ -138,7 +140,7 @@ async function runSpecCliNonJsonCommand(options: {
     err: data => options.log(data),
     env: options.env ? {...process.env, ...options.env} : process.env,
   };
-  const command = getSpecCliInfo().command;
+  const command = await findWindowsExecutable(getSpecCliInfo().command);
   console.log(`About to run ${command} ${options.args.join(' ')}`); // TODO - take an output arg to allow GH to use core.info
   const result = await spawn(command, options.args, spawnOptions);
   return result.code
@@ -159,6 +161,7 @@ export interface DevContainerCliBuildArgs {
   userDataFolder?: string;
   output?: string,
   noCache?: boolean,
+  cacheTo?: string[],
 }
 async function devContainerBuild(
   args: DevContainerCliBuildArgs,
@@ -193,6 +196,11 @@ async function devContainerBuild(
       commandArgs.push('--cache-from', cacheFrom),
     );
   }
+  if (args.cacheTo) {
+    args.cacheTo.forEach(cacheTo =>
+      commandArgs.push('--cache-to', cacheTo),
+    );
+  }
   return await runSpecCliJsonCommand<DevContainerCliBuildResult>({
     args: commandArgs,
     log,
@@ -209,6 +217,7 @@ export interface DevContainerCliUpArgs {
   workspaceFolder: string;
   configFile: string | undefined;
   additionalCacheFroms?: string[];
+  cacheTo?: string[];
   skipContainerUserIdUpdate?: boolean;
   env?: string[];
   userDataFolder?: string;
@@ -231,6 +240,11 @@ async function devContainerUp(
   if (args.additionalCacheFroms) {
     args.additionalCacheFroms.forEach(cacheFrom =>
       commandArgs.push('--cache-from', cacheFrom),
+    );
+  }
+  if (args.cacheTo) {
+    args.cacheTo.forEach(cacheTo =>
+      commandArgs.push('--cache-to', cacheTo),
     );
   }
   if (args.userDataFolder) {

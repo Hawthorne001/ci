@@ -44,6 +44,10 @@ inputs:
   env:
     required: false
     description: Specify environment variables to pass to the docker run command
+  inheritEnv:
+    required: false
+    default: false
+    description: Inherit all environment variables of the runner CI machine.
   skipContainerUserIdUpdate:
     required: false
     default: false
@@ -59,6 +63,9 @@ inputs:
     required: false
     default: false
     description: Builds the image with `--no-cache` (takes precedence over `cacheFrom`)
+  cacheTo:
+    required: false
+    description: Specify the image to cache the built image to
 outputs:
   runCmdOutput:
     description: The output of the command specified in the runCmd input

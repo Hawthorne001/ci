@@ -53,6 +53,8 @@ on:
 permissions:
   contents: write
   packages: write
+  pull-requests: write
+  checks: write
 
 jobs:
   build: # run build using the github action!
@@ -74,11 +76,11 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - id: set_image_push_option
         name: Set image push option
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             // if running full tests then use the filter option, for the dev container action
@@ -90,7 +92,7 @@ jobs:
 
       - name: Login to GitHub Container Registry
         if: ${{ steps.set_image_push_option.outputs.image_push_option == 'filter' }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -108,7 +110,7 @@ jobs:
 
       - id: set_image_tag
         name: Set image_tag...
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ inputs.prNumber }}
         with:
@@ -129,7 +131,7 @@ jobs:
             console.log(context);
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -176,14 +178,14 @@ jobs:
           echo "VERSION_SHORT=${VERSION_SHORT}"
           echo "VERSION_MAJOR=${VERSION_MAJOR}"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Create dev AzDO VSIX artifact
         with:
           name: azdo-task-dev
           path: ./output/devcontainers-dev.ci-${{ steps.build.outputs.version }}.vsix
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Create release AzDO VSIX artifact
         with:
           name: azdo-task
@@ -229,7 +231,7 @@ jobs:
       # If prHeadSha is specified then explicity mark the checks for that SHA
       - name: Report check status
         if: ${{ inputs.prHeadSha }}
-        uses: LouisBrunner/checks-action@v1.6.0
+        uses: LouisBrunner/checks-action@v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # the name must be identical to the one received by the real job
@@ -264,7 +266,7 @@ jobs:
           echo "VERSION_MAJOR=${VERSION_MAJOR}"
 
       - name: Download release VSIX
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: azdo-task
           path: output
@@ -275,7 +277,7 @@ jobs:
           echo "VERSION_SHORT: $VERSION_SHORT"
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.ref == 'refs/heads/main' # only need this for push (on `main`)
         with:
           registry: ghcr.io
@@ -283,7 +285,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -362,18 +364,18 @@ jobs:
           echo "VERSION_SHORT: $VERSION_SHORT"
 
       - name: Download workflow artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: output
 
       - name: Download release VSIX
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: azdo-task-dev
           path: output
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: github.ref == 'refs/heads/main' # only need this for push (on `main`)
         with:
           registry: ghcr.io
@@ -381,7 +383,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -433,7 +435,7 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -471,7 +473,7 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -510,18 +512,18 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -555,18 +557,18 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -608,10 +610,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -619,7 +621,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -653,10 +655,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -664,7 +666,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -698,10 +700,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -709,7 +711,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -743,10 +745,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -754,7 +756,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -788,10 +790,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -799,7 +801,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -833,10 +835,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -844,7 +846,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -885,10 +887,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -896,7 +898,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -930,7 +932,7 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -962,22 +964,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # This can be omitted once runner images have a version of Skopeo > 1.4.1
-      # See https://github.com/containers/skopeo/issues/1874 (and https://github.com/devcontainers/ci/issues/191#issuecomment-1416384710)
-      - name: Update skopeo
-        run: |
-          sudo apt purge buildah golang-github-containers-common podman skopeo
-          sudo apt autoremove --purge
-          REPO_URL="https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable"
-          source /etc/os-release
-          sudo sh -c "echo 'deb ${REPO_URL}/x${NAME}_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list"
-          sudo wget -qnv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/x${NAME}_${VERSION_ID}/Release.key -O Release.key
-          sudo apt-key add Release.key
-          sudo apt-get update
-          sudo apt-get install skopeo
+      - name: Skopeo version
+        run: skopeo --version
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -985,7 +976,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -1032,14 +1023,14 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -1062,22 +1053,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Install updated Skopeo
-        # This can be omitted once runner images have a version of Skopeo > 1.4.1
-        # See https://github.com/containers/skopeo/issues/1874
-        run: |
-          sudo apt purge buildah golang-github-containers-common podman skopeo
-          sudo apt autoremove --purge
-          REPO_URL="https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable"
-          source /etc/os-release
-          sudo sh -c "echo 'deb ${REPO_URL}/x${NAME}_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list"
-          sudo wget -qnv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/x${NAME}_${VERSION_ID}/Release.key -O Release.key
-          sudo apt-key add Release.key
-          sudo apt-get update
-          sudo apt-get install skopeo
+      - name: Skopeo version
+        run: skopeo --version
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action
@@ -1136,10 +1116,10 @@ jobs:
           ref: ${{ inputs.prRef }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: ${{ needs.build.outputs.image_push_option == 'filter' }}
         with:
           registry: ghcr.io
@@ -1148,7 +1128,7 @@ jobs:
 
 
       # Published action contains compiled JS, but we need to compile it here
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Compile GH action

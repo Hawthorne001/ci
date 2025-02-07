@@ -203,6 +203,7 @@ jobs:
       env:
         IMAGE_TAG: $(IMAGE_TAG)
 
+    # This can be omitted once runner images have a version of Skopeo > 1.4.1
     - script: |
         sudo apt purge buildah golang-github-containers-common podman skopeo
         sudo apt autoremove --purge
