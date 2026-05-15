@@ -182,4 +182,18 @@ describe('createMultiPlatformImage', () => {
 
 		expect(mockExec).not.toHaveBeenCalled();
 	});
+
+	test('should surface registry error when a requested platform image is missing', async () => {
+		// e.g. caller asks to merge linux-amd64 + linux-arm64 but the arm64 build was skipped.
+		const missingTagStderr =
+			'ERROR: failed to resolve source metadata for ghcr.io/my-org/my-image:v1.0.0-linux-arm64: ghcr.io/my-org/my-image:v1.0.0-linux-arm64: not found: manifest unknown';
+		const mockExec = jest.fn<Promise<ExecResult>, Parameters<ExecFunction>>()
+			.mockResolvedValue({exitCode: 1, stdout: '', stderr: missingTagStderr});
+
+		await expect(
+			createMultiPlatformImage(mockExec, 'ghcr.io/my-org/my-image', 'v1.0.0', ['linux-amd64', 'linux-arm64']),
+		).rejects.toThrow(`manifest creation failed with exit code 1: ${missingTagStderr}`);
+
+		expect(mockExec).toHaveBeenCalledTimes(1);
+	});
 });
