@@ -90,6 +90,8 @@ Instead of using QEMU emulation on a single runner, you can use native runners i
 
 ### GitHub Actions Example
 
+In the workflow below, the `build` job is fanned out by the matrix into one run per entry: one runner builds and pushes `linux/amd64`, the other builds and pushes `linux/arm64`. Once both platform-specific images are in the registry, the `manifest` job merges them into one multi-arch tag.
+
 ```yaml
 jobs:
   build:
