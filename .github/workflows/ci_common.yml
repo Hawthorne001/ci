@@ -292,6 +292,7 @@ jobs:
         run: |
           (cd common && npm install && npm run build)
           (cd github-action/ && npm install && npm run build && npm run package)
+          (cd merge/ && npm install && npm run build && npm run package)
 
       - name: Publish AzDO Task
         uses: ./
