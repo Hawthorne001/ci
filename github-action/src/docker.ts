@@ -77,20 +77,3 @@ export async function pushImage(
 		core.endGroup();
 	}
 }
-
-export async function createMultiPlatformImage(
-	imageName: string,
-	tag: string,
-	platformTags: string[],
-): Promise<boolean> {
-	core.startGroup(`📦 ${imageName}:${tag}`);
-	try {
-		await docker.createMultiPlatformImage(exec, imageName, tag, platformTags);
-		return true;
-	} catch (error) {
-		core.setFailed(error);
-		return false;
-	} finally {
-		core.endGroup();
-	}
-}

@@ -71,17 +71,3 @@ export async function pushImage(
 		return false;
 	}
 }
-
-export async function createMultiPlatformImage(
-	imageName: string,
-	tag: string,
-	platformTags: string[],
-): Promise<boolean> {
-	try {
-		await docker.createMultiPlatformImage(exec, imageName, tag, platformTags);
-		return true;
-	} catch (error) {
-		task.setResult(task.TaskResult.Failed, `${error}`);
-		return false;
-	}
-}
