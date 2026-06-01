@@ -128,6 +128,13 @@
       "type": "multiLine",
       "label": "Specify the image to cache the built image to",
       "required": false
+    },
+    {
+      "name": "useNativeRunner",
+      "type": "boolean",
+      "label": "Set to true for native multi-platform builds. When true, platform must be a single value and the image tag suffix is auto-derived.",
+      "required": false,
+      "defaultValue": false
     }
   ],
   "outputVariables": [{
